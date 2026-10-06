@@ -1,45 +1,60 @@
-<!-- This is the markdown template for the final project of the Building AI course, 
-created by Reaktor Innovations and University of Helsinki. 
-Copy the template, paste it to your GitHub README and edit! -->
+# SmartOR: Integrated Staff Rostering and Supply Restock AI
 
-# SmartShift: Intelligent Auto-Scheduler for Shift Workers
-
-Final project for the Building AI course (University of Helsinki & Reaktor)
-
----
+Final project for the Building AI course
 
 ## Summary
 
-SmartShift is an intelligent constraint-satisfaction scheduling system that automates 4-week flexible work shifts under strict statutory labor regulations. It balances departmental staffing demands, guarantees mandatory rest periods and circadian consistency, and dynamically eliminates shift monopolies across team members.
+Operating Rooms (ORs) are the most resource-intensive and critical units in any healthcare institution. A successful surgical schedule requires seamless synchronization between two vital pillars: compliant, well-rested clinical staff and just-in-time sterile surgical supply availability. **SmartOR** is an integrated AI-driven operations platform combining a **Multi-Objective Constraint Satisfaction Heuristic Engine** for nurse rostering with a **Predictive Dynamic Buffer Restock Engine** for surgical packs and consumables. By enforcing labor compliance (Taiwan Labor Standards Act 4-week flexible hours, 11-hour rest intervals, circadian consistency) and predicting surgical pack demand ($P = S + Q + E - O$ with holiday supply buffers and habit learning), SmartOR prevents both staff burnout and costly OR stockouts.
 
 ---
 
 ## Background
 
-Managing staff rosters in healthcare, retail, and 24/7 service departments is notoriously complex and labor-intensive. In many jurisdictions—such as Taiwan's Labor Standards Act Article 30-1 (Four-Week Flexible Working Hours)—schedulers must satisfy intricate mathematical and statutory rules:
+Operating room management currently faces two coupled, high-stakes operational bottlenecks:
 
-* **Legal non-compliance risks**: A 4-week cycle must strictly cap total working hours at 160 hours, guarantee at least 8 mandatory days off (4 regular leaves + 4 rest days), and limit consecutive workdays to 6 days.
-* **Circadian disruption and worker fatigue**: Poor manual scheduling often causes severe biological rhythm shifts (e.g., finishing an evening shift at 22:00 and starting an early morning shift at 08:00 with less than 11 hours of rest).
-* **Shift monopoly and unfairness**: Certain staff members often monopolize favorable or lucrative shifts ("shift hoarding"), while others are disproportionately assigned unpopular weekend or night duties.
-* **Administrative overhead**: Department heads and head nurses typically spend 15 to 25 hours every month manually drafting and revising schedules.
+1. **Staff Rostering Fatigue & Non-Compliance**:
+   * **Regulatory Complexity**: Under 4-week flexible working hour frameworks, head nurses must adhere to strict constraints: a 160-hour total cap, at least 8 mandatory days off (4 regular leaves + 4 rest days), a maximum of 6 consecutive work days, and at least 11 consecutive hours of rest between consecutive shifts.
+   * **Circadian Disruption & Monopolies**: Manual drafting often creates erratic sleep transitions (e.g., evening shift ending at 22:00 followed by an 08:00 morning shift) and unfair "shift hoarding," leading to clinical fatigue, turnover, and medical errors.
+   * **High Administrative Cost**: Head nurses spend 15–25 hours every month manually drafting and revising schedules.
+
+2. **Surgical Pack & Sterile Supply Stockouts vs. Expiration**:
+   * **Asymmetric Risk**: Running out of sterile laparotomy drapes or specialty surgical packs mid-operation halts surgery immediately. Conversely, over-ordering leads to sterile shelf-life expiration (>60% waste rate in low-turnover packs) and storage crowding.
+   * **Supply Chain Disruption**: Central Sterile Supply Departments (CSR/CSSD) close on weekends and statutory holidays, creating multi-day replenishment blackouts that manual ordering fails to anticipate.
+
+By treating staff rosters and surgical supplies as a unified operational ecosystem, SmartOR guarantees that every scheduled operating theater has both qualified, well-rested personnel and necessary sterile materials.
 
 ---
 
 ## How is it used?
 
-SmartShift is designed for department supervisors, head nurses, and HR managers. The scheduling workflow operates in four clear stages:
+SmartOR serves surgical department supervisors, head nurses, and OR materials managers through a dual-module automated workflow:
 
-1. **Input & Lock**: Import staff constraints (e.g., maternity night-shift bans, weekday-only workers) and pre-booked annual/medical leaves.
-2. **AI Schedule Generation**: The heuristic constraint-satisfaction engine assigns shifts day-by-day using multi-objective scoring and lookahead evaluation.
-3. **Interactive Visual Review**: Supervisors inspect the interactive 28-day calendar grid, using a brush toolbar for micro-adjustments.
-4. **Statutory Compliance Audit**: An automated diagnostics panel evaluates each staff member's total hours, legal days off, and resting intervals, reporting pass/violation metrics in real time.
+1. **Personnel Rostering (Human Resource Pillar)**:
+   * **Constraint & Leave Intake**: Department heads import maternity protections, weekday-only contracts, and pre-booked leaves (annual, public, wedding/bereavement).
+   * **Heuristic Scheduling**: The CSP heuristic solver assigns shifts day-by-day across 28-day cycles, optimizing fairness, sleep regularity, and labor limits.
+   * **Real-Time Audit**: An automated statutory diagnostics panel monitors compliance, warning against any 11-hour rest violations or consecutive day limits.
 
-![System Architecture & Workflow](https://raw.githubusercontent.com/Felicitycoffee/work-dey/main/app_icon_transparent.png)
+2. **Supply Restock & Forecasting (Physical Resource Pillar)**:
+   * **Demand Aggregation**: Pulls next-day ($O$) and next-next-day ($N$) surgical booking requirements based on procedure bills of materials (BOM).
+   * **Dynamic Inventory Calculation**: Evaluates morning shelf stock ($S$), pending orders ($Q$), and emergency restocks ($E$) to calculate post-preparation balance:
+     $$P = S + Q + E - O$$
+   * **Holiday-Aware Order Suggestion**: Dynamically scales the theoretical order target $T = \max(0, R - P)$ based on upcoming weekend/holiday supply gap days and learned ordering habits, outputting final orders ($U$) and daily visual check sheets ($V$).
+
+![SmartOR System Architecture](https://raw.githubusercontent.com/Felicitycoffee/work-dey/main/app_icon_transparent.png)
 
 ```
-[ Pre-Booked Leaves & Rules ] ──► [ Heuristic CSP Engine ] ──► [ Collapsible Legal Audit ] ──► [ Export / Print ]
-                                       ▲
-[ Circadian & Fairness Penalty ] ──────┘
+┌─────────────────────────────────────────────────────────────┐
+│                       SmartOR Platform                      │
+├──────────────────────────────┬──────────────────────────────┤
+│  MODULE 1: STAFF ROSTERING   │  MODULE 2: SUPPLY RESTOCK    │
+├──────────────────────────────┼──────────────────────────────┤
+│ • 4-Week Flexible Hours CSP  │ • Surgical Demand BOM (N, O) │
+│ • 11h Rest Interval Guard    │ • Post-Prep Balance (P)      │
+│ • Circadian Rhythm Buckets   │ • CSR Holiday Gap Scaling    │
+│ • Dynamic Anti-Monopoly Bias │ • Bayesian Habit Learning    │
+└──────────────┬───────────────┴──────────────┬───────────────┘
+               ▼                              ▼
+        [ Compliant OR Roster ]       [ Zero-Stockout Orders ]
 ```
 
 ---
@@ -47,116 +62,177 @@ SmartShift is designed for department supervisors, head nurses, and HR managers.
 ## Data sources and AI methods
 
 ### Data Sources
-* **Internal Rosters**: Employee profiles, skill certifications, special legal constraints, and department requirements.
-* **Statutory Holiday Calendars**: Integrated open data from government administrative APIs (e.g., Taiwan Directorate-General of Personnel Administration) for automatic public holiday compensatory leave calculations.
-* **Historical Schedule Records**: Cached monthly assignment matrices stored locally to track cumulative weekend distribution.
+* **Hospital Rostering Records**: Department employee lists, skill credentials, statutory leave registries, and historical weekend assignments.
+* **Surgical Schedules & BOMs**: Operative schedules mapping planned surgeries to required sterile drape packs and instrument kits.
+* **Inventory & CSR Restock Logs**: Morning on-shelf inventory levels ($S$), daily delivery records ($Q$), emergency supplements ($E$), and sterilization lead times.
+* **Statutory Holiday APIs**: Public calendar integration (Taiwan Directorate-General of Personnel Administration) for compensatory leaves and supply blackout intervals.
 
 ### AI & Algorithmic Methods
-SmartShift frames monthly nurse and personnel rostering as a **Multi-Objective Constraint Satisfaction Problem (CSP)** combined with **Heuristic Search Optimization**:
 
-1. **Greedy Heuristic Assignment with Lookahead**:
-   The engine scores candidate staff $s$ for each shift on day $d$ using a multi-factor objective function:
-   $$\text{Score}(s, d, \text{shift}) = w_1 \cdot \Delta_{\text{hours}} + w_2 \cdot \text{Fairness}(s) + w_3 \cdot \text{CircadianJump} + w_4 \cdot \text{ConsecutiveDays}$$
-2. **Dynamic Reverse-Weight Fairness Balancing**:
-   Tracks real-time shift frequencies across the department. Staff with higher assignments of specific shifts receive stepped penalty weights ($+60 \sim +140$), preventing "fixed shift monopolies".
-3. **Circadian Rhythm Modeling (Biological Time Buckets)**:
-   Shifts are classified into chronological clusters (`DAY`: 06:30–09:00, `MID`: 09:30–12:00, `EVE`: 12:30–18:00, `NIGHT`: 22:00–00:00). Introducing $\ge 3$ distinct clusters within a single week triggers a heavy penalty ($+4,500$) to protect sleep health.
-4. **Hard Lookahead Constraints**:
-   Evaluates day $d-1$ (backward) and day $d+1$ (forward). Any transition providing $< 11$ hours of consecutive rest is filtered out immediately.
+SmartOR leverages complementary optimization and predictive modeling approaches across both pillars:
+
+#### 1. Multi-Objective Heuristic Constraint Satisfaction (Staff Rostering)
+Staff scheduling is modeled as a constrained combinatorial optimization problem solved via greedy forward heuristic search with lookahead:
+* **Multi-Factor Scoring Function**: Candidate nurse $s$ on day $d$ for shift $k$ is evaluated by:
+  $$	ext{Score}(s, d, k) = w_1 \cdot 	ext{HoursNorm} + w_2 \cdot 	ext{ShiftFairness}(s, k) + w_3 \cdot 	ext{CircadianJump} + w_4 \cdot 	ext{Fatigue}(s)$$
+* **Circadian Biological Buckets**: Categorizes shifts into `DAY` (06:30–09:00), `MID` (09:30–12:00), `EVE` (12:30–18:00), and `NIGHT` (22:00–00:00). Penalizes rapid transitions ($\ge 3$ distinct buckets within 7 days triggers $+4,500$ penalty; identical shift time slots receive $-25$ bonus).
+* **Dynamic Anti-Monopoly Weighting**: Stepped penalties ($+60 \sim +140$) prevent high-demand shifts from being captured by specific individuals.
+* **Lookahead Rest Enforcement**: Hard filter blocks any shift combination resulting in $< 11$ hours of rest between consecutive calendar days.
+
+#### 2. Dynamic Safety Stock & Habit-Learned Restock Forecasting (Supply Management)
+Sterile surgical consumables replenishment requires balancing immediate availability against sterilization expiration:
+* **Balance & Target Order Equation**:
+  $$P = S + Q + E - O$$
+  $$T = \max(0, R_{	ext{adjusted}} - P)$$
+* **Holiday Gap Compensation Factor ($\kappa$)**:
+  When CSR closure spans $k$ consecutive days (e.g., long holiday weekends), required safety stock $R$ dynamically expands:
+  $$R_{	ext{adjusted}} = R 	imes \left(1 + \kappa \cdot \log_2(1 + k)ight)$$
+* **Learned Ordering Habit Model**: Incorporates historical manual overrides and empirical order confidence scores to prevent irrational over-ordering of low-turnover specialty packs.
 
 ---
 
 ### Demonstration Code (Python Prototype)
 
-The core heuristic scoring and assignment pipeline can be demonstrated with the following self-contained Python script:
+The following runnable Python prototype demonstrates both the heuristic shift scoring engine and the dynamic surgical pack order calculator:
 
 ```python
 """
-SmartShift - Heuristic Shift Assignment Demonstrator
-Calculates priority scores based on fairness, consecutive work days, and circadian consistency.
+SmartOR - Integrated Staff Rostering & Surgical Supply AI Demonstrator
+Building AI Course - Final Project (University of Helsinki & Reaktor)
 """
 
-from typing import List, Dict
+from typing import Dict, Any
 
+# ==========================================
+# Module 1: Nurse Rostering Heuristic Solver
+# ==========================================
 SHIFTS = {
     "D": {"start": 8.0, "duration": 8.0, "category": "DAY"},
     "E": {"start": 16.0, "duration": 8.0, "category": "EVE"},
     "N": {"start": 0.0, "duration": 8.0, "category": "NIGHT"},
 }
 
-def calculate_assignment_score(
-    emp: Dict, 
-    shift_code: str, 
-    yesterday_shift: str, 
-    consecutive_days: int, 
-    dept_min_shifts: int
+def evaluate_shift_candidate(
+    nurse: Dict[str, Any],
+    candidate_shift: str,
+    yesterday_shift: str,
+    consecutive_workdays: int,
+    dept_min_shift_count: int
 ) -> float:
-    # 1. Hard Constraint: Consecutive work days strictly capped at 6
-    if consecutive_days >= 6:
+    # Hard constraint: maximum 6 consecutive work days
+    if consecutive_workdays >= 6:
         return float("inf")
-    
-    # 2. Hard Constraint: 11-hour minimum rest between shifts
+
+    # Hard constraint: minimum 11 hours rest interval
     if yesterday_shift and yesterday_shift in SHIFTS:
         y_end = SHIFTS[yesterday_shift]["start"] + SHIFTS[yesterday_shift]["duration"]
-        today_start = SHIFTS[shift_code]["start"] + 24.0
-        rest_hours = today_start - y_end
-        if rest_hours < 11.0:
-            return float("inf") # Illegal under labor law
-            
+        today_start = SHIFTS[candidate_shift]["start"] + 24.0
+        if (today_start - y_end) < 11.0:
+            return float("inf")
+
     score = 0.0
-    
-    # 3. Department Fairness Penalty (Anti-monopoly)
-    curr_count = emp.get("shift_counts", {}).get(shift_code, 0)
-    score += curr_count * 60 + (curr_count - dept_min_shifts) * 80
-    
-    # 4. Consecutive work day fatigue penalty
-    if consecutive_days == 4:
-        score += 120
-    elif consecutive_days == 5:
-        score += 350
-        
-    # 5. Circadian rhythm consistency reward
+
+    # Department fairness penalty (prevents shift monopoly)
+    current_count = nurse.get("shift_counts", {}).get(candidate_shift, 0)
+    score += current_count * 60.0 + (current_count - dept_min_shift_count) * 80.0
+
+    # Fatigue penalty for consecutive days
+    if consecutive_workdays >= 4:
+        score += (consecutive_workdays - 3) * 150.0
+
+    # Circadian consistency bonus
     if yesterday_shift and yesterday_shift in SHIFTS:
-        if SHIFTS[yesterday_shift]["category"] == SHIFTS[shift_code]["category"]:
-            score -= 25.0 # Reward consistent sleep schedule
-            
+        if SHIFTS[yesterday_shift]["category"] == SHIFTS[candidate_shift]["category"]:
+            score -= 30.0
+
     return score
 
-# Example Execution
+# ==========================================
+# Module 2: Surgical Supply Restock Predictor
+# ==========================================
+def calculate_surgical_restock(
+    item_name: str,
+    shelf_stock_morning: int,   # S
+    prev_day_order_qty: int,    # Q
+    emergency_restock: int,     # E
+    today_prep_required: int,   # O
+    standard_stock: int,        # R
+    holiday_gap_days: int = 0
+) -> Dict[str, Any]:
+    # Post-preparation remaining balance P = S + Q + E - O
+    post_prep_balance = shelf_stock_morning + prev_day_order_qty + emergency_restock - today_prep_required
+
+    # Dynamic safety stock adjustment for holiday/weekend CSR closure
+    buffer_multiplier = 1.0 + (0.35 * holiday_gap_days if holiday_gap_days > 0 else 0.0)
+    adjusted_standard_stock = int(standard_stock * buffer_multiplier)
+
+    # Theoretical order requirement T = max(0, R_adjusted - P)
+    target_order_qty = max(0, adjusted_standard_stock - post_prep_balance)
+
+    return {
+        "item": item_name,
+        "post_prep_balance_P": post_prep_balance,
+        "adjusted_standard_stock": adjusted_standard_stock,
+        "recommended_order_U": target_order_qty
+    }
+
+# ==========================================
+# Integrated System Execution
+# ==========================================
 if __name__ == "__main__":
-    employee = {"name": "Alice", "shift_counts": {"D": 4, "E": 1}}
-    score_day = calculate_assignment_score(employee, "D", yesterday_shift="D", consecutive_days=3, dept_min_shifts=2)
-    score_eve = calculate_assignment_score(employee, "E", yesterday_shift="D", consecutive_days=3, dept_min_shifts=1)
-    
-    print(f"Candidate Shift D Score: {score_day} (Lower is better)")
-    print(f"Candidate Shift E Score: {score_eve} (Lower is better)")
-    print(f"Recommended Shift: {'D' if score_day < score_eve else 'E'}")
+    print("=========================================================")
+    print(" SmartOR: Integrated Staff Rostering & Restock Engine    ")
+    print("=========================================================\n")
+
+    # 1. Staff Rostering Test
+    nurse = {"name": "Nurse Lin", "shift_counts": {"D": 5, "E": 2}}
+    score_d = evaluate_shift_candidate(nurse, "D", yesterday_shift="D", consecutive_workdays=3, dept_min_shift_count=3)
+    score_e = evaluate_shift_candidate(nurse, "E", yesterday_shift="D", consecutive_workdays=3, dept_min_shift_count=2)
+    print(f"[Staff] Evaluation for {nurse["name"]}:")
+    print(f"  - Shift D Score: {score_d:.1f} | Shift E Score: {score_e:.1f}")
+    print(f"  -> Recommended: {"Shift D" if score_d < score_e else "Shift E"} (Lower is better)\n")
+
+    # 2. Supply Restock Test (Laparotomy Pack with a 2-day CSR holiday gap)
+    restock = calculate_surgical_restock(
+        item_name="Laparotomy Drape Pack",
+        shelf_stock_morning=12,
+        prev_day_order_qty=8,
+        emergency_restock=0,
+        today_prep_required=14,
+        standard_stock=20,
+        holiday_gap_days=2
+    )
+    print(f"[Supply] Restock Recommendation for {restock["item"]}:")
+    print(f"  - Post-Prep Balance (P): {restock["post_prep_balance_P"]} packs")
+    print(f"  - Adjusted Standard Target (R): {restock["adjusted_standard_stock"]} packs (with 2-day holiday buffer)")
+    print(f"  -> Recommended Order Qty (U): {restock["recommended_order_U"]} packs")
+    print("=========================================================")
 ```
 
 ---
 
 ## Challenges
 
-While SmartShift automates schedule construction and ensures labor compliance, several domain challenges remain:
+Integrating human staffing with physical inventory introduces unique real-world complexities:
 
-* **Unpredictable Short-Term Leaves**: The system plans static monthly schedules; sudden emergency medical leaves or acute hospital surges still require on-call substitutions.
-* **Mathematical Infeasibility**: If a department's total headcount falls below the mathematical lower bound required for 24/7 staffing, no algorithm can satisfy all legal constraints without overtime or auxiliary personnel.
-* **Algorithmic Trust & Ethical Transparency**: Employees must trust that assignment distributions are fair. Providing transparent diagnostic breakdowns is essential to prevent perceived bias.
+* **Surgical Delays & Acute Emergencies**: Emergency trauma procedures consume both on-call staff hours and emergency sterile packs ($E$) unpredictably, necessitating real-time re-optimization.
+* **Sterile Expiration vs. Stockout Trade-off**: High-value specialty packs (e.g., neurosurgery or pediatric cardiovascular kits) have stringent expiration deadlines; over-buffering during holidays risks costly clinical waste.
+* **Algorithmic Explainability & Clinical Trust**: Healthcare professionals require total transparency. Explaining *why* a particular nurse was assigned a night shift or *why* a pack order was throttled is essential for operational adoption.
 
 ---
 
 ## What next?
 
-Future developments for SmartShift include:
+The evolution roadmap for SmartOR includes:
 
-1. **Integer Linear Programming (ILP) & Hybrid SAT Solvers**: Integrating Google OR-Tools to verify global Pareto optimality alongside heuristic speed.
-2. **Peer-to-Peer Shift Swap Engine**: Using recommendation algorithms to facilitate mutual shift exchanges that preserve compliance without manager intervention.
-3. **Mobile & Messaging Bot Integration**: Exporting schedules directly into calendar subscriptions (iCal/Google Calendar) and LINE notifications for real-time leave requests.
+1. **Integrated Mixed Integer Linear Programming (MILP)**: Employing Google OR-Tools and SCIP solvers to co-optimize operating room schedule capacity, staff availability, and sterilization autoclave batch schedules simultaneously.
+2. **Predictive Surgery Demand Forecasting**: Utilizing machine learning (XGBoost / Temporal Fusion Transformers) on historical EMR surgical case data to forecast weekly surgical pack demand directly from surgeon booking patterns.
+3. **Automated RFID & Mobile Restock Verification**: Pairing mobile visual inspection sheets ($V$) with RFID cabinet sensors for real-time inventory synchronization without manual paper tallies.
 
 ---
 
 ## Acknowledgments
 
-* **Course Inspiration**: Developed as part of the *Building AI* curriculum by the **University of Helsinki** and **Reaktor Innovations**.
-* **Statutory Framework**: Guided by the **Labor Standards Act of Taiwan** (Article 30-1 Four-Week Flexible Working Hours regulations).
-* **Open Source Tools**: Powered by [Lucide Icons](https://lucide.dev/) (ISC License), [SheetJS](https://sheetjs.com/) (Apache 2.0), and [Flatpickr](https://flatpickr.js.org/) (MIT License).
+* **Course Affiliation**: Developed for the **Building AI** course created by the **University of Helsinki** and **Reaktor Innovations**.
+* **Clinical Domain Insights**: Synthesized from hospital Operating Room operations, Central Sterile Supply Department (CSR/CSSD) logistics, and Taiwanese labor regulations (Article 30-1 Four-Week Flexible Working Hours).
+* **Open Source Foundations**: Built with modern web and data tools including [Lucide Icons](https://lucide.dev/), [SheetJS](https://sheetjs.com/), and [Flatpickr](https://flatpickr.js.org/).
