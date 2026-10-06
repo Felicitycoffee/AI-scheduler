@@ -2,7 +2,7 @@
 created by Reaktor Innovations and University of Helsinki. 
 Copy the template, paste it to your GitHub README and edit! -->
 
-# SmartShift: Intelligent Constraint-Satisfaction Auto-Scheduler for Flexible Working Hours
+# SmartShift: Intelligent Auto-Scheduler for Shift Workers
 
 Final project for the Building AI course (University of Helsinki & Reaktor)
 
